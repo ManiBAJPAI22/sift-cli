@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+#
+# sift — AI triage for Solidity audits: open-source scanners + hosted AI.
+#
+# Thin wrapper over the vendored pipeline (Makefile + triage/). It maps the
+# friendly SIFT_* env vars onto the pipeline's TRIAGE_* vars and drives the
+# existing `make` targets, so `make audit`/`make triage` keep working unchanged.
+#
+#   sift init          install Sift into the current repo (Makefile + triage/)
+#   sift scan [path]   run scanners + AI triage on a repo (default: .)
+#   sift triage        triage already-generated reports/ only
+#   sift --help        usage + auth
+set -euo pipefail
+
+REPO="${AUDIT_PIPELINE_REPO:-ManiBAJPAI22/sol-audit-pipeline}"
+RAW="https://raw.githubusercontent.com/${REPO}/main"
+
+# Map the friendly SIFT_* vars onto what the pipeline reads. Don't clobber
+# explicit TRIAGE_* values if the user set them directly.
+if [ -n "${SIFT_API_KEY:-}" ] && [ -z "${TRIAGE_API_KEY:-}" ]; then
+  export TRIAGE_API_KEY="$SIFT_API_KEY"
+fi
+if [ -n "${SIFT_API_URL:-}" ] && [ -z "${TRIAGE_API_URL:-}" ]; then
+  export TRIAGE_API_URL="$SIFT_API_URL"
+fi
+
+usage() {
+  cat <<'EOF'
+sift — AI triage for Solidity audits (open-source scanners + hosted AI)
+
+USAGE
+  sift init            install Sift into the current repo (Makefile + triage/)
+  sift scan [path]     run scanners + AI triage on a repo (default: .)
+  sift triage          triage already-generated reports/ only
+  sift --help          this help
+
+AUTH (hosted AI — Pro/Team)
+  export SIFT_API_KEY=sk_live_...   your key from thesift.xyz (after subscribing)
+  export SIFT_API_URL=https://...   optional; defaults to the Sift hosted API
+
+Without SIFT_API_KEY, Sift runs the free path: scanners only (findings marked
+needs_human), or your own local model via OLLAMA_HOST (self-host). The first
+hosted call can take ~90s while the model warms up.
+
+Results are written to reports/triage.md.
+EOF
+}
+
+die() { printf "\033[31m%s\033[0m\n" "$*" >&2; exit 1; }
+info() { printf "\033[36m%s\033[0m\n" "$*"; }
+ok() { printf "\033[32m%s\033[0m\n" "$*"; }
+
+have_makefile() { [ -f Makefile ] && grep -q '^audit:' Makefile 2>/dev/null; }
+
+require_makefile() {
+  have_makefile || die "No Sift pipeline here. Run 'sift init' first (inside your Foundry repo)."
+}
+
+cmd="${1:-}"; [ "$#" -gt 0 ] && shift || true
+case "$cmd" in
+  init)
+    info "→ installing Sift into $(pwd) …"
+    curl -fsSL "$RAW/install.sh" | bash -s -- "$@"
+    ;;
+  scan)
+    [ -n "${1:-}" ] && { cd "$1" || die "no such directory: $1"; }
+    require_makefile
+    if [ -n "${TRIAGE_API_KEY:-}" ]; then
+      info "→ Sift: scanning + hosted AI triage (key set; first call may take ~90s)…"
+    else
+      info "→ Sift: scanning (free path — no SIFT_API_KEY; findings marked needs_human)…"
+    fi
+    make audit
+    ok "✓ Done. See reports/triage.md"
+    ;;
+  triage)
+    require_makefile
+    make triage
+    ok "✓ Done. See reports/triage.md"
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    die "unknown command: $cmd  (try: sift --help)"
+    ;;
+esac

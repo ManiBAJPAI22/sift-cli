@@ -1,0 +1,85 @@
+name: audit
+on:
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      - name: Install audit tools
+        # Versions pinned for deterministic CI. Bump here when you've validated a newer
+        # version locally — floating `@latest` causes silent drift when a tool releases
+        # breaking changes.
+        run: |
+          pipx install 'slither-analyzer==0.10.4' 'solc-select==1.0.4'
+          solc-select install {{SOLC_VERSION}} && solc-select use {{SOLC_VERSION}}
+          npm i -g 'solhint@5.0.3' '@cyfrin/aderyn@0.1.9'
+
+      # OLLAMA_HOST points the AI triage layer at your self-hosted model server
+      # (e.g. an AWS box running serve/Dockerfile). Set repo variable
+      # TRIAGE_OLLAMA_HOST to enable it; if unset, triage degrades to
+      # `needs_human` and the build still passes.
+      - name: Run scanners (no triage yet)
+        env:
+          OLLAMA_HOST: ${{ vars.TRIAGE_OLLAMA_HOST }}
+        run: make fmt lint test aderyn cov gas summary
+
+      - name: Run slither
+        continue-on-error: true
+        run: make slither || true
+
+      - name: Rebuild summary with slither findings
+        run: make summary
+
+      - name: AI triage (adjudicate findings incl. slither)
+        env:
+          OLLAMA_HOST: ${{ vars.TRIAGE_OLLAMA_HOST }}
+        run: make triage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-reports
+          path: reports/
+
+      - name: Post summary as PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: reports/summary.md
+          header: audit-summary
+
+      - name: Post AI triage as PR comment
+        if: github.event_name == 'pull_request' && hashFiles('reports/triage.md') != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: reports/triage.md
+          header: audit-triage
+
+  nightly-fuzz:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22' }
+      # Medusa pinned for the same reason as the main job's tools.
+      - run: go install github.com/crytic/medusa@v0.1.5
+      - run: make fuzz

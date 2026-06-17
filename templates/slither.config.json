@@ -1,0 +1,7 @@
+{
+  "filter_paths": "lib|test|script|out|cache|broadcast|deployments|node_modules",
+  "exclude_informational": false,
+  "exclude_low": false,
+  "fail_on": "medium",
+  "sarif": "reports/slither.sarif"
+}
