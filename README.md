@@ -51,6 +51,14 @@ layer that judges each finding **real vs false-positive** (with a suggested fix)
 2. **Install the `sift` CLI** (once per machine):
 
 ```bash
+npm install -g sift-audit
+sift setup
+```
+
+`sift setup` installs the scanner toolchain (Foundry, Solhint, Aderyn, Slither). No npm?
+The curl equivalent:
+
+```bash
 sudo curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main/bin/sift -o /usr/local/bin/sift && sudo chmod +x /usr/local/bin/sift
 ```
 
