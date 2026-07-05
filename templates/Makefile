@@ -1,4 +1,4 @@
-.PHONY: fmt lint test slither aderyn cov gas fuzz symbolic audit ci reports summary check-tools triage serve
+.PHONY: fmt lint test slither aderyn cov gas fuzz symbolic audit ci reports summary check-tools triage
 
 # Python interpreter for the AI triage layer (pure stdlib — no pip install).
 PYTHON ?= python3
@@ -63,11 +63,6 @@ triage-gate: reports
 	@OLLAMA_HOST=$(OLLAMA_HOST) TRIAGE_MODEL=$(TRIAGE_MODEL) \
 	  TRIAGE_API_KEY=$(TRIAGE_API_KEY) TRIAGE_API_URL=$(TRIAGE_API_URL) \
 	  $(PYTHON) -m triage.run --reports reports --fail-on high
-
-# Build + run the self-hosted triage model server locally (Ollama in Docker).
-serve:
-	docker build -t sol-audit-triage:latest -f serve/Dockerfile serve/
-	docker run -d --name triage -p 11434:11434 sol-audit-triage:latest
 
 audit: fmt lint test aderyn cov gas summary triage
 ci:    audit slither fuzz symbolic

@@ -88,9 +88,6 @@ FILES=(
   "triage/adjudicate.py:triage/adjudicate.py"
   "triage/report.py:triage/report.py"
   "triage/run.py:triage/run.py"
-  # Self-hosted model server (Ollama) for AWS/local.
-  "serve/Modelfile:serve/Modelfile"
-  "serve/Dockerfile:serve/Dockerfile"
 )
 
 for pair in "${FILES[@]}"; do
