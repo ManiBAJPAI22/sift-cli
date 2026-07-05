@@ -12,7 +12,7 @@
 #   sift --help        usage + auth
 set -euo pipefail
 
-REPO="${AUDIT_PIPELINE_REPO:-ManiBAJPAI22/sol-audit-pipeline}"
+REPO="${AUDIT_PIPELINE_REPO:-ManiBAJPAI22/sift-cli}"
 RAW="https://raw.githubusercontent.com/${REPO}/main"
 
 # Map the friendly SIFT_* vars onto what the pipeline reads. Don't clobber

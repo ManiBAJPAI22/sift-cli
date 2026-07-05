@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-REPO_RAW="${AUDIT_PIPELINE_REPO:-https://raw.githubusercontent.com/ManiBAJPAI22/sol-audit-pipeline/main}"
+REPO_RAW="${AUDIT_PIPELINE_REPO:-https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main}"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
