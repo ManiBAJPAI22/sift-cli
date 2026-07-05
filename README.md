@@ -1,4 +1,4 @@
-# sol-audit-pipeline  
+# sift-cli  
 v0.2.0
 
 Drop-in smart contract audit pipeline for Foundry projects. One command scaffolds a complete CI/CD setup with static analysis, coverage, gas reporting, and consolidated audit summaries posted as PR comments.
@@ -7,13 +7,13 @@ Drop-in smart contract audit pipeline for Foundry projects. One command scaffold
 
 If this saved you time, consider:
 
-- ⭐ **[Starring the repo](https://github.com/ManiBAJPAI22/sol-audit-pipeline)** — helps others find it
-- 🍴 **[Forking](https://github.com/ManiBAJPAI22/sol-audit-pipeline/fork)** — customize the templates for your team's conventions and point your projects at your fork via `AUDIT_PIPELINE_REPO` env var:
+- ⭐ **[Starring the repo](https://github.com/ManiBAJPAI22/sift-cli)** — helps others find it
+- 🍴 **[Forking](https://github.com/ManiBAJPAI22/sift-cli/fork)** — customize the templates for your team's conventions and point your projects at your fork via `AUDIT_PIPELINE_REPO` env var:
 ```bash
-  AUDIT_PIPELINE_REPO=https://raw.githubusercontent.com/YourUser/sol-audit-pipeline/main \
+  AUDIT_PIPELINE_REPO=https://raw.githubusercontent.com/YourUser/sift-cli/main \
     curl -fsSL $AUDIT_PIPELINE_REPO/install.sh | bash
 ```
-- 🐛 **[Opening an issue](https://github.com/ManiBAJPAI22/sol-audit-pipeline/issues/new)** — bug reports and feature requests welcome
+- 🐛 **[Opening an issue](https://github.com/ManiBAJPAI22/sift-cli/issues/new)** — bug reports and feature requests welcome
 - 📣 **Sharing** — if you use this on a project, a mention in your repo's README helps the tool grow
 
 ---
@@ -46,14 +46,21 @@ The open-source pipeline lists findings and marks them `needs_human`. **Sift** a
 layer that judges each finding **real vs false-positive** (with a suggested fix) — cutting
 ~85% of the noise so you only read what matters.
 
-1. **Subscribe and get your API key** at **[thesift.xyz](https://thesift.xyz)** (the key is
+1. **Get your API key** at **[thesift.xyz](https://thesift.xyz)** (the key is
    shown once — save it).
-2. **Run it on your repo:**
+2. **Install the `sift` CLI** (once per machine):
 
 ```bash
-export SIFT_API_KEY=sk_live_...     # from thesift.xyz, after subscribing
-sift init     # once per repo (inside a Foundry project): vendors the Makefile + triage/
-sift scan     # scanners + hosted AI triage  ->  reports/triage.md
+sudo curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main/bin/sift -o /usr/local/bin/sift && sudo chmod +x /usr/local/bin/sift
+```
+
+3. **Run it from your Foundry repo's root** (where `foundry.toml` lives). `sift init` is
+   once per repo — it vendors the Makefile + `triage/`; results land in `reports/triage.md`:
+
+```bash
+export SIFT_API_KEY=sk_live_YOUR_KEY
+sift init
+sift scan
 ```
 
 Without `SIFT_API_KEY`, `sift scan` runs the **free** path (scanners only, findings marked
@@ -68,7 +75,7 @@ first hosted call can take ~90s while the model warms up.
 ### 1. Install audit tools (once per machine)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sol-audit-pipeline/main/scripts/install-tools.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main/scripts/install-tools.sh | bash
 ```
 
 Works on **macOS and Linux**. Detects your package manager (Homebrew on macOS; apt/dnf/pacman/zypper on Linux), installs missing base dependencies, then installs the audit toolchain:
@@ -89,7 +96,7 @@ The script is idempotent (safe to re-run to upgrade) and verifies every tool at 
 Inside any Foundry project root:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sol-audit-pipeline/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main/install.sh | bash
 ```
 
 The installer:
@@ -335,7 +342,7 @@ For submodule configs (e.g. OpenZeppelin's `foundry.toml`), the Makefile's `ader
 Check the file didn't get corrupted by an editor (e.g. TextEdit's smart quotes). Re-fetch cleanly:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sol-audit-pipeline/main/templates/.solhint.json -o .solhint.json
+curl -fsSL https://raw.githubusercontent.com/ManiBAJPAI22/sift-cli/main/templates/.solhint.json -o .solhint.json
 ```
 
 ### `make audit` fails on `cov` with stack-too-deep
