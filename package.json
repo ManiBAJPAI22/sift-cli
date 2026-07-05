@@ -1,0 +1,36 @@
+{
+  "name": "thesift",
+  "version": "0.2.0",
+  "description": "Sift — AI triage for Solidity audits. Runs open-source scanners (Slither, Aderyn, Solhint), then separates real vulnerabilities from false positives.",
+  "bin": {
+    "sift": "bin/sift"
+  },
+  "files": [
+    "bin/"
+  ],
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "homepage": "https://thesift.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManiBAJPAI22/sift-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ManiBAJPAI22/sift-cli/issues"
+  },
+  "keywords": [
+    "solidity",
+    "audit",
+    "security",
+    "slither",
+    "aderyn",
+    "foundry",
+    "smart-contracts",
+    "static-analysis",
+    "triage"
+  ],
+  "author": "Mani Bajpai",
+  "license": "MIT"
+}

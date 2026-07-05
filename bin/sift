@@ -6,6 +6,7 @@
 # friendly SIFT_* env vars onto the pipeline's TRIAGE_* vars and drives the
 # existing `make` targets, so `make audit`/`make triage` keep working unchanged.
 #
+#   sift setup         install the scanner toolchain (once per machine)
 #   sift init          install Sift into the current repo (Makefile + triage/)
 #   sift scan [path]   run scanners + AI triage on a repo (default: .)
 #   sift triage        triage already-generated reports/ only
@@ -29,6 +30,7 @@ usage() {
 sift — AI triage for Solidity audits (open-source scanners + hosted AI)
 
 USAGE
+  sift setup           install the scanner toolchain (Foundry, Solhint, Aderyn, Slither)
   sift init            install Sift into the current repo (Makefile + triage/)
   sift scan [path]     run scanners + AI triage on a repo (default: .)
   sift triage          triage already-generated reports/ only
@@ -58,6 +60,10 @@ require_makefile() {
 
 cmd="${1:-}"; [ "$#" -gt 0 ] && shift || true
 case "$cmd" in
+  setup)
+    info "→ installing the scanner toolchain (once per machine)…"
+    curl -fsSL "$RAW/scripts/install-tools.sh" | bash
+    ;;
   init)
     info "→ installing Sift into $(pwd) …"
     curl -fsSL "$RAW/install.sh" | bash -s -- "$@"
