@@ -9,7 +9,7 @@ TRIAGE_MODEL ?= sol-audit-triage
 # findings are sent to TRIAGE_API_URL instead of a local model. Leave unset for
 # the free/DIY paths.
 TRIAGE_API_KEY ?=
-TRIAGE_API_URL ?= https://api.example.com
+TRIAGE_API_URL ?= https://sift-api-96yh.onrender.com
 
 # Use bash for recipes (consistent behaviour across macOS/Linux).
 SHELL := bash
