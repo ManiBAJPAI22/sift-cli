@@ -1,5 +1,5 @@
 {
-  "name": "thesift",
+  "name": "sift-audit",
   "version": "0.2.0",
   "description": "Sift — AI triage for Solidity audits. Runs open-source scanners (Slither, Aderyn, Solhint), then separates real vulnerabilities from false positives.",
   "bin": {
